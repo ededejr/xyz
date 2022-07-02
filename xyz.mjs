@@ -33,7 +33,7 @@ if (!scriptFileName) {
   process.exit();
 }
 
-$`zx ${scriptFileName}`;
+$`zx --quiet ${scriptFileName}`;
 
 async function getScript() {
   const constructedPath = path.join(__dirname, 'src', ...args);
