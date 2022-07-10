@@ -1,10 +1,9 @@
 #!/usr/bin/env zx
-
 // Get available scripts
-const scripts = (await glob('src/**/*.mjs')).filter(script => !script.includes('_'));
+const scripts = (await glob(`${__dirname}/src/**/*.mjs`)).filter(script => !script.includes('_'));
 const availableCommands = scripts
   .map(script => script
-    .replace(/^src\//, '')
+    .replace(`${__dirname}/src/`, '')
     .replace(/\.mjs$/, '')
     .split('/')
   );
