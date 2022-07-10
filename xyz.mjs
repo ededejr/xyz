@@ -1,7 +1,7 @@
 #!/usr/bin/env zx
 
 // Get available scripts
-const scripts = await glob('src/**/*.mjs');
+const scripts = (await glob('src/**/*.mjs')).filter(script => !script.includes('_'));
 const availableCommands = scripts
   .map(script => script
     .replace(/^src\//, '')
@@ -33,7 +33,7 @@ if (!scriptFileName) {
   process.exit();
 }
 
-$`zx --quiet ${scriptFileName}`;
+$`zx --quiet ${scriptFileName} ${Object.keys(flags).map(flag => `--${flag}=${flags[flag]}`).join(' ')}`;
 
 async function getScript() {
   const constructedPath = path.join(__dirname, 'src', ...args);
