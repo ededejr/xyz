@@ -1,5 +1,5 @@
 #!/usr/bin/env zx
-import { JENKINS_API_URL } from './_utils.mjs';
+import { JENKINS_API_URL } from '../_utils/url.mjs';
 
 const { _: args, ...flags } = argv;
 

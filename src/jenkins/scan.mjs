@@ -1,5 +1,5 @@
 #!/usr/bin/env zx
-import { JENKINS_URL } from './_utils.mjs';
+import { JENKINS_URL } from '../_utils/url.mjs';
 
 const { _: args, ...flags} = argv;
 const { repo } = flags;

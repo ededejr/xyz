@@ -9,6 +9,7 @@
   "author": "@ededejr",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.0.1",
     "zx": "^7.0.1"
   }
 }
