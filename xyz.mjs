@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+
 // Parse command
 const { _: args, ...flags} = argv;
 
@@ -18,6 +19,7 @@ if (!scriptFileName) {
   process.exit();
 }
 
+process.env.FORCE_COLOR=3
 $`zx --quiet ${scriptFileName} ${Object.keys(flags).map(flag => `--${flag}=${flags[flag]}`).join(' ')}`;
 
 async function getScript() {
