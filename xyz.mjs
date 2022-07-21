@@ -1,5 +1,8 @@
 #!/usr/bin/env zx
-// Get available scripts
+// Parse command
+const { _: args, ...flags} = argv;
+
+// Load available scripts
 const scripts = (await glob(`${__dirname}/src/**/*.mjs`)).filter(script => !script.includes('_'));
 const availableCommands = scripts
   .map(script => script
@@ -7,23 +10,6 @@ const availableCommands = scripts
     .replace(/\.mjs$/, '')
     .split('/')
   );
-
-// Parse command
-const { _: args, ...flags} = argv;
-
-function formatArrayOutput(arr) {
-  return `\n${arr.map(item => ` - ${item}`).join('\n')}`;
-}
-
-console.log(
-  '---------------------------',
-  'Debugger',
-  '\nscripts:', formatArrayOutput(scripts),
-  '\ncommands:', formatArrayOutput(availableCommands.map(command => command.join(' '))),
-  '\ncurrent args:', args,
-  '\n---------------------------',
-  '\n'
-);
 
 const scriptFileName = await getScript();
 
