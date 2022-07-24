@@ -14,6 +14,7 @@ const availableCommands = scripts.map((script) =>
     .replace(`${ROOT_DIR}src`, '')
     .replace(/\.mjs$/, '')
     .split('/')
+    .filter(Boolean)
 );
 
 let scriptOutput = '';

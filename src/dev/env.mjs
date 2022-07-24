@@ -1,4 +1,6 @@
 #!/usr/bin/env zx
-import { getEnv } from '../_utils/env.mjs';
 
+// @meta.description: Output environment variables
+
+import { getEnv } from '../_utils/env.mjs';
 console.log(getEnv());
