@@ -2,23 +2,32 @@
 import { getEnv } from '../_utils/env.mjs';
 
 const SpotifyEndpoints = {
-  base: `https://api.spotify.com/v1/me`,
-  token: `https://accounts.spotify.com/api/token`,
-  topTracks: `/top/tracks`,
-  topArtists: `/top/artists`,
-  currentlyPlaying: `/player/currently-playing`,
+  base: {
+    api: 'https://api.spotify.com/v1/me',
+    accounts: 'https://accounts.spotify.com',
+  },
+  accounts: {
+    token: '/api/token',
+    authorize: '/authorize',
+  },
+  api: {
+    topTracks: `/top/tracks`,
+    topArtists: `/top/artists`,
+    currentlyPlaying: `/player/currently-playing`,
+  }
 };
 
 export class SpotifyApi {
   accessToken = null;
   accessTokenTimeout = 60 * 1000 * 60;
+  callbackUri = 'https://edede.ca/spotify/callback';
 
   /**
    * Get currently playing track from Spotify.
    */
    async fetchCurrentlyPlaying() {
     this.log(`fetchCurrentlyPlaying`);
-    return await this.makeServiceCall(SpotifyEndpoints.currentlyPlaying, true);
+    return await this.makeServiceCall(SpotifyEndpoints.api.currentlyPlaying);
   }
 
   /**
@@ -26,7 +35,7 @@ export class SpotifyApi {
    */
   async fetchTopTracks() {
     this.log(`fetchTopTracks`);
-    const { items } = await this.makeServiceCall(SpotifyEndpoints.topTracks, true);
+    const { items } = await this.makeServiceCall(SpotifyEndpoints.api.topTracks);
 
     return items.map(item => ({
       album: {
@@ -50,7 +59,7 @@ export class SpotifyApi {
    */
    async fetchTopArtists() {
     this.log(`fetchTopArtists`);
-    const { items } = await this.makeServiceCall(SpotifyEndpoints.topArtists, true);
+    const { items } = await this.makeServiceCall(SpotifyEndpoints.api.topArtists);
 
     return items.map(item => ({
       followers: item.followers.total,
@@ -63,17 +72,17 @@ export class SpotifyApi {
     }));
   }
 
-  async makeServiceCall(endpoint, withOathToken = false) {
-    if (!withOathToken && !this.accessToken) {
-      await this.fetchAccessToken();
+  async makeServiceCall(endpoint) {
+    if (!this.accessToken) {
+      await this.refreshAccessToken();
     }
 
     this.log(`making service call to ${endpoint}`);
-    const url = new URL(`${SpotifyEndpoints.base}${endpoint}`);
+    const url = new URL(`${SpotifyEndpoints.base.api}${endpoint}`);
     
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${withOathToken ? getEnv('SPOTIFY_CODE') : this.accessToken}`,
+        Authorization: `Bearer ${this.accessToken}`,
         ContentType: "application/json",
       },
     });
@@ -85,13 +94,62 @@ export class SpotifyApi {
     return await response.json();
   }
 
-  async fetchAccessToken() {
-    this.log('Fetching access token');
+  async authorize() {
+    this.log('building authorize url');
     const searchParams = new URLSearchParams({
-      grant_type: "client_credentials",
+      response_type: 'code',
+      client_id: getEnv('SPOTIFY_CLIENT_ID'),
+      scope: 'user-read-recently-played user-read-currently-playing user-library-read user-top-read',
+      redirect_uri: this.callbackUri,
     }).toString();
 
-    const url = new URL(`${SpotifyEndpoints.token}?${searchParams}`);
+    const url = new URL(`${SpotifyEndpoints.base.accounts}${SpotifyEndpoints.accounts.authorize}?${searchParams}`);
+    return url.href;
+  }
+
+  async fetchRefreshToken() {
+    this.log('Fetching access token');
+    const searchParams = new URLSearchParams({
+      grant_type: "authorization_code",
+      code: getEnv('SPOTIFY_CODE'),
+      redirect_uri: this.callbackUri,
+    }).toString();
+
+    const url = new URL(`${SpotifyEndpoints.base.accounts}${SpotifyEndpoints.token}?${searchParams}`);
+
+    const response = await fetch(url,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${this.BasicAuth}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: searchParams,
+      });
+
+    const { access_token, refresh_token, expires_in } = await response.json();
+
+    this.log('Acquired access token');
+    this.accessToken = access_token;
+    this.accessTokenTimeout = expires_in * 1000;
+
+    // Clear the access token after the chosen timeout.
+    setTimeout(() => {
+      this.accessToken = null;
+      this.log('Cleared access token');
+    }, this.accessTokenTimeout).unref();
+    
+    return refresh_token;
+  }
+
+  async refreshAccessToken() {
+    this.log('Refreshing access token');
+    const searchParams = new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: getEnv('SPOTIFY_REFRESH_TOKEN'),
+    }).toString();
+
+    const url = new URL(`${SpotifyEndpoints.base.accounts}${SpotifyEndpoints.accounts.token}?${searchParams}`);
 
     const response = await fetch(url,
       {
