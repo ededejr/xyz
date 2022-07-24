@@ -21,11 +21,25 @@ if (!scriptFileName) {
   process.exit();
 }
 
+const { stdout, ...passedFlags } = flags;
+
 process.env.FORCE_COLOR = 3;
 
-await $`zx --quiet ${scriptFileName} ${Object.keys(flags)
-  .map((flag) => `--${flag}=${flags[flag]}`)
-  .join(' ')}`;
+if (stdout) {
+  const { stdout, stderr } = await $`zx --quiet ${scriptFileName} ${Object.keys(
+    passedFlags
+  )
+    .map((flag) => `--${flag}=${passedFlags[flag]}`)
+    .join(' ')}`;
+  if (stderr) {
+    console.error(stderr);
+  }
+  console.log(stdout);
+} else {
+  await $`zx --quiet ${scriptFileName} ${Object.keys(passedFlags)
+    .map((flag) => `--${flag}=${passedFlags[flag]}`)
+    .join(' ')}`;
+}
 
 async function getScript() {
   const constructedPath = path.join(__dirname, 'src', ...args);
