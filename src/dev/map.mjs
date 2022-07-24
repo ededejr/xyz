@@ -1,9 +1,10 @@
 #!/usr/bin/env zx
+import crypto from 'crypto';
 
 const { _: args, ...flags } = argv;
 
-const showObj = flags['object'];
-const verbose = flags['verbose'];
+const showObject = flags['object'];
+const showJson = flags['json'];
 
 const ROOT_DIR = path.join(__dirname, '../../');
 
@@ -47,15 +48,18 @@ async function generateCommandMap(scripts) {
       curr = curr[pt];
     }
 
-    curr.signature = signature;
-    curr.script = script;
-    curr.meta = {};
-
     // read file to determine metadata
     const contents = await fs.readFile(script);
     const fileText = contents.toString();
 
+    // extract metadata with regex
     const descriptionMatch = fileText.match(RE.meta.description);
+
+    // build command
+    curr.fingerprint = fingerprint(fileText);
+    curr.signature = signature;
+    curr.script = script;
+    curr.meta = {};
 
     if (descriptionMatch) {
       const [, description] = descriptionMatch;
@@ -66,9 +70,13 @@ async function generateCommandMap(scripts) {
   return map;
 }
 
+function fingerprint(content) {
+  return crypto.createHash('md5').update(content).digest('hex');
+}
+
 function printCommand(obj, key) {
   const command = obj[key];
-  const { signature, script, meta, ...subcommands } = command;
+  const { fingerprint, signature, script, meta, ...subcommands } = command;
   const { description } = meta || { description: '' };
 
   if (signature && signature.includes('.')) {
@@ -78,6 +86,7 @@ function printCommand(obj, key) {
     console.log(`${indent}${chalk.magenta(`${key}`)}
 ${indent} ${chalk.dim(`signature: ${signature}`)}
 ${indent} ${chalk.dim(`script: ${script}`)}
+${indent} ${chalk.dim(`fingerprint: ${fingerprint}`)}
 ${indent} ${chalk.dim('meta:')}${
       description ? chalk.dim(`\n${indent}  - description: ${description}`) : ''
     }
@@ -86,6 +95,7 @@ ${indent} ${chalk.dim('meta:')}${
     console.log(`${chalk.bold(key)}
  ${chalk.dim(`signature: ${signature}`)}
  ${chalk.dim(`script: ${script}`)}
+ ${chalk.dim(`fingerprint: ${fingerprint}`)}
  ${chalk.dim('meta:')}${
       description ? chalk.dim(`\n  - description: ${description}`) : ''
     }
@@ -101,9 +111,11 @@ ${indent} ${chalk.dim('meta:')}${
 
 const commandMap = await generateCommandMap(scripts);
 
-if (showObj) {
+if (showObject) {
   console.log(commandMap);
+} else if (showJson) {
+  console.log(JSON.stringify(commandMap, null, 2));
+} else {
+  console.log(chalk.dim('Generating map...\n'));
+  Object.keys(commandMap).forEach((key) => printCommand(commandMap, key));
 }
-
-console.log(chalk.dim('Generating map...\n'));
-Object.keys(commandMap).forEach((key) => printCommand(commandMap, key));

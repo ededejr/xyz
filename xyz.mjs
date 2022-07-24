@@ -22,7 +22,8 @@ if (!scriptFileName) {
 }
 
 process.env.FORCE_COLOR = 3;
-$`zx --quiet ${scriptFileName} ${Object.keys(flags)
+
+await $`zx --quiet ${scriptFileName} ${Object.keys(flags)
   .map((flag) => `--${flag}=${flags[flag]}`)
   .join(' ')}`;
 
