@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "lint": "prettier --write 'src/**/*.mjs'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint:check": "prettier --check '**/*.mjs'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
   },
   "author": "@ededejr",
   "license": "ISC",
