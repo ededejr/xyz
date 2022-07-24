@@ -1,6 +1,6 @@
 #!/usr/bin/env zx
 
-import { SpotifyApi } from "../_utils.mjs";
+import { SpotifyApi } from '../_utils.mjs';
 
 const api = new SpotifyApi();
 const artists = await api.fetchTopArtists();
@@ -12,15 +12,18 @@ function outputArtist(artist, index) {
 
   const title = chalk.bold(`${rank}${artist.name}`);
   const middleLine = chalk.dim(`${genres}`);
-  const bottomLine = chalk.dim(`${artist.popularity} · ${formatter.format(artist.followers)} · ${artist.url}`);
-  
+  const bottomLine = chalk.dim(
+    `${artist.popularity} · ${formatter.format(artist.followers)} · ${
+      artist.url
+    }`
+  );
+
   const spacing = ' '.repeat(rank.length);
-  
+
   console.log(`
 ${title}
 ${spacing}${middleLine}
-${spacing}${bottomLine}`
-  );
+${spacing}${bottomLine}`);
 }
 
-artists.forEach(outputArtist)
+artists.forEach(outputArtist);

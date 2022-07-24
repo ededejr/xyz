@@ -1,17 +1,17 @@
 #!/usr/bin/env zx
-import { getEnv } from "../_utils/env.mjs";
-import { PORTAINER_URL } from "../_utils/url.mjs";
+import { getEnv } from '../_utils/env.mjs';
+import { PORTAINER_URL } from '../_utils/url.mjs';
 
 async function makeRequest() {
   try {
     const body = {
-      username: getEnv("PORTAINER_USERNAME"),
-      password: getEnv("PORTAINER_PASSWORD")
+      username: getEnv('PORTAINER_USERNAME'),
+      password: getEnv('PORTAINER_PASSWORD'),
     };
     const res = await fetch(`${PORTAINER_URL}/api/auth`, {
-      method: "post",
+      method: 'post',
       body,
-      headers: {'Content-Type': 'application/json'}
+      headers: { 'Content-Type': 'application/json' },
     });
 
     console.log(res);

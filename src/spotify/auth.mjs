@@ -1,8 +1,8 @@
 #!/usr/bin/env zx
 
-import { SpotifyApi } from "./_utils.mjs";
+import { SpotifyApi } from './_utils.mjs';
 
-const { _: args, ...flags} = argv;
+const { _: args, ...flags } = argv;
 
 const shouldRefreshToken = flags['refresh-token'];
 

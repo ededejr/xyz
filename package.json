@@ -4,6 +4,7 @@
   "description": "a collection of zx scripts",
   "main": "index.js",
   "scripts": {
+    "lint": "prettier --write 'src/**/*.mjs'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "@ededejr",
@@ -11,5 +12,9 @@
   "dependencies": {
     "dotenv": "^16.0.1",
     "zx": "^7.0.1"
+  },
+  "devDependencies": {
+    "husky": "^8.0.1",
+    "prettier": "^2.7.1"
   }
 }

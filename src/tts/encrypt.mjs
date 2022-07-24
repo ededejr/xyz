@@ -1,7 +1,7 @@
 #!/usr/bin/env zx
-import { Encrypter } from "./_utils.mjs";
+import { Encrypter } from './_utils.mjs';
 
-const { _: args, ...flags} = argv;
+const { _: args, ...flags } = argv;
 const { text } = flags;
 
 if (!text) {

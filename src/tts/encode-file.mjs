@@ -20,5 +20,5 @@ const w = fs.createWriteStream('file.out.txt');
 
 // start pipe
 r.pipe(encrypt)
-    // .pipe(decrypt)
-    .pipe(w);
+  // .pipe(decrypt)
+  .pipe(w);

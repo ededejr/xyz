@@ -14,9 +14,11 @@ function loadEnv(config = undefined) {
   }
 
   require('dotenv').config(config);
-  const validKeys = Object.keys(process.env).filter(key => key.startsWith('XYZ'));
+  const validKeys = Object.keys(process.env).filter((key) =>
+    key.startsWith('XYZ')
+  );
   const env = {};
-  validKeys.forEach(key => {
+  validKeys.forEach((key) => {
     env[key.replace('XYZ_', '')] = process.env[key];
   });
 
