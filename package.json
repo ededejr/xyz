@@ -7,7 +7,9 @@
     "lint": "prettier --write 'src/**/*.mjs'",
     "lint:check": "prettier --check '**/*.mjs'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "release": "standard-version",
+    "release:dry-run": "standard-version --dry-run"
   },
   "author": "@ededejr",
   "license": "ISC",
@@ -17,6 +19,7 @@
   },
   "devDependencies": {
     "husky": "^8.0.1",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "standard-version": "^9.5.0"
   }
 }
