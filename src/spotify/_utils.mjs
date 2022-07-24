@@ -3,10 +3,10 @@ import { getEnv } from '../_utils/env.mjs';
 
 const SpotifyEndpoints = {
   base: `https://api.spotify.com/v1/me`,
-  nowPlaying: `/player/currently-playing`,
   token: `https://accounts.spotify.com/api/token`,
   topTracks: `/top/tracks`,
   topArtists: `/top/artists`,
+  currentlyPlaying: `/player/currently-playing`,
 };
 
 export class SpotifyApi {
@@ -14,11 +14,19 @@ export class SpotifyApi {
   accessTokenTimeout = 60 * 1000 * 60;
 
   /**
+   * Get currently playing track from Spotify.
+   */
+   async fetchCurrentlyPlaying() {
+    this.log(`fetchCurrentlyPlaying`);
+    return await this.makeServiceCall(SpotifyEndpoints.currentlyPlaying, true);
+  }
+
+  /**
    * Get the top tracks from Spotify.
    */
   async fetchTopTracks() {
     this.log(`fetchTopTracks`);
-    const { items } = await this.makeServiceCall(SpotifyEndpoints.topTracks);
+    const { items } = await this.makeServiceCall(SpotifyEndpoints.topTracks, true);
 
     return items.map(item => ({
       album: {
@@ -42,7 +50,7 @@ export class SpotifyApi {
    */
    async fetchTopArtists() {
     this.log(`fetchTopArtists`);
-    const { items } = await this.makeServiceCall(SpotifyEndpoints.topArtists);
+    const { items } = await this.makeServiceCall(SpotifyEndpoints.topArtists, true);
 
     return items.map(item => ({
       followers: item.followers.total,
@@ -55,8 +63,8 @@ export class SpotifyApi {
     }));
   }
 
-  async makeServiceCall(endpoint) {
-    if (!this.accessToken) {
+  async makeServiceCall(endpoint, withOathToken = false) {
+    if (!withOathToken && !this.accessToken) {
       await this.fetchAccessToken();
     }
 
@@ -65,9 +73,14 @@ export class SpotifyApi {
     
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${withOathToken ? getEnv('SPOTIFY_CODE') : this.accessToken}`,
+        ContentType: "application/json",
       },
     });
+
+    if (response.status !== 200) {
+      throw new Error(`Error "${response.status} ${response.statusText}" calling ${endpoint}`);
+    }
 
     return await response.json();
   }
@@ -75,26 +88,26 @@ export class SpotifyApi {
   async fetchAccessToken() {
     this.log('Fetching access token');
     const searchParams = new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: getEnv('SPOTIFY_REFRESH_TOKEN'),
+      grant_type: "client_credentials",
     }).toString();
 
     const url = new URL(`${SpotifyEndpoints.token}?${searchParams}`);
 
-    const response = await fetch(
-      url,
+    const response = await fetch(url,
       {
         method: 'POST',
         headers: {
           Authorization: `Basic ${this.BasicAuth}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
+        body: searchParams,
       });
 
-    const { access_token } = await response.json();
+    const { access_token, expires_in } = await response.json();
 
     this.log('Acquired access token');
     this.accessToken = access_token;
+    this.accessTokenTimeout = expires_in * 1000;
 
     // Clear the access token after the chosen timeout.
     setTimeout(() => {
