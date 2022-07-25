@@ -27,7 +27,9 @@ console.log(
   'xyz report\n',
   scriptOutput,
   '\ncommands:',
-  formatArrayOutput(availableCommands.map((command) => command.join(' '))),
+  formatArrayOutput(
+    availableCommands.map((command) => command.join(' ')).sort()
+  ),
   '\ncurrent args:\n',
   args,
   '\n'
