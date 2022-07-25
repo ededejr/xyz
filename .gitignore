@@ -130,5 +130,5 @@ dist
 .pnp.*
 
 # xyz internals
-.xyz/*
+.xyz
 # !.xyz/signature.json => enable when pre-push is finished
