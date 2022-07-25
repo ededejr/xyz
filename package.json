@@ -16,6 +16,7 @@
   "author": "@ededejr",
   "license": "ISC",
   "dependencies": {
+    "conventional-changelog": "^3.1.25",
     "dotenv": "^16.0.1",
     "zx": "^7.0.1"
   },
