@@ -6,6 +6,7 @@ import { getCommands } from './_utils/getCommands.mjs';
 const { _: args, ...flags } = argv;
 
 const showJson = flags['json'];
+const verbose = flags['verbose'];
 
 async function generateSignature() {
   const commands = getCommands();
@@ -22,10 +23,15 @@ async function generateSignature() {
   return map;
 }
 
-const signature = await generateSignature();
+const signatureObj = await generateSignature();
+const signature = fingerprint(JSON.stringify(signatureObj));
 
-if (showJson) {
-  console.log(JSON.stringify(signature, null, 2));
+if (verbose) {
+  console.log(chalk.gray(`\nsignature: ${chalk.bold.blue(signature)}\n`));
+  console.log(chalk.gray(`composition:\n`));
+  console.log(chalk.dim(JSON.stringify(signatureObj, null, 2)));
+} else if (showJson) {
+  console.log(JSON.stringify({ signature }));
 } else {
   console.log(signature);
 }
