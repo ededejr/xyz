@@ -1,4 +1,7 @@
 #!/usr/bin/env zx
+
+import { printBanner } from '../_utils/printer.mjs';
+
 const { _: args, ...flags } = argv;
 
 const withScripts = flags['with-scripts'];
@@ -23,8 +26,8 @@ if (withScripts) {
   scriptOutput = '\nscripts:' + formatArrayOutput(scripts);
 }
 
+printBanner();
 console.log(
-  'xyz report\n',
   scriptOutput,
   '\ncommands:',
   formatArrayOutput(
