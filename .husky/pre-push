@@ -1,5 +1,3 @@
 #!/usr/bin/env sh
 npm run repo:sign
 git add .xyz/signature.json
-git commit --amend -m "chore(signature): update signature"
-git push --quiet
