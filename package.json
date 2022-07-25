@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "release": "standard-version",
     "release:dry-run": "standard-version --dry-run",
-    "generate:map": "zx ./xyz.mjs dev map --json > ./.xyz/map.json"
+    "repo:sign": "zx ./xyz.mjs dev repo sign --stdout --json > ./.xyz/signature.json"
   },
   "author": "@ededejr",
   "license": "ISC",

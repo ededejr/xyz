@@ -10,4 +10,4 @@ if npm run lint:check; then
 fi
 
 npm run lint
-npm run generate:map
+npm run repo:sign

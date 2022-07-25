@@ -1,17 +1,12 @@
 #!/usr/bin/env zx
-import crypto from 'crypto';
+import { set } from './_utils/set.mjs';
+import { fingerprint } from './_utils/fingerprint.mjs';
+import { getCommands } from './_utils/getCommands.mjs';
 
 const { _: args, ...flags } = argv;
 
 const showObject = flags['object'];
 const showJson = flags['json'];
-
-const ROOT_DIR = path.join(__dirname, '../../');
-
-// Get available scripts
-const scripts = (await glob(`${ROOT_DIR}/src/**/*.mjs`)).filter(
-  (script) => !script.includes('_')
-);
 
 const RE = {
   meta: {
@@ -19,34 +14,15 @@ const RE = {
   },
 };
 
-async function generateCommandMap(scripts) {
-  const commands = scripts.map((script) => ({
-    script,
-    signature: script
-      .replace(`${ROOT_DIR}src`, '')
-      .replace('.mjs', '')
-      .replace(/\//g, '.')
-      .substring(1),
-  }));
+async function generateCommandMap() {
+  const commands = getCommands();
 
   const map = {};
 
   for (const command of commands) {
     const { script, signature } = command;
 
-    const objPath = signature.split('.');
-
-    // carry the pointer down the object
-    let curr = map;
-
-    for (const pt of objPath) {
-      if (!curr[pt]) {
-        curr[pt] = {};
-      }
-      // update the pointer to be the
-      // next level of the object
-      curr = curr[pt];
-    }
+    const value = {};
 
     // read file to determine metadata
     const contents = await fs.readFile(script);
@@ -56,22 +32,20 @@ async function generateCommandMap(scripts) {
     const descriptionMatch = fileText.match(RE.meta.description);
 
     // build command
-    curr.fingerprint = fingerprint(fileText);
-    curr.signature = signature;
-    curr.script = script;
-    curr.meta = {};
+    value.fingerprint = fingerprint(fileText);
+    value.signature = signature;
+    value.script = script;
+    value.meta = {};
 
     if (descriptionMatch) {
       const [, description] = descriptionMatch;
-      curr.meta.description = description;
+      value.meta.description = description;
     }
+
+    set(value, signature, map);
   }
 
   return map;
-}
-
-function fingerprint(content) {
-  return crypto.createHash('md5').update(content).digest('hex');
 }
 
 function printCommand(obj, key) {
@@ -109,7 +83,7 @@ ${indent} ${chalk.dim('meta:')}${
   }
 }
 
-const commandMap = await generateCommandMap(scripts);
+const commandMap = await generateCommandMap();
 
 if (showObject) {
   console.log(commandMap);
