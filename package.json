@@ -10,7 +10,8 @@
     "prepare": "husky install",
     "release": "standard-version",
     "release:dry-run": "standard-version --dry-run",
-    "repo:sign": "zx ./xyz.mjs dev repo sign --stdout --json > ./.xyz/signature.json"
+    "repo:sign": "zx ./xyz.mjs dev repo sign --stdout --json > ./.xyz/signature.json",
+    "repo:version": "zx ./xyz.mjs dev repo sign --version"
   },
   "author": "@ededejr",
   "license": "ISC",
