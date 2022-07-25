@@ -2,7 +2,7 @@
 [ -n "$CI" ] && exit 0
 . "$(dirname "$0")/_/husky.sh"
 
-echo "Lint ✅"
+npm run repo:version
 
 if npm run lint:check; then
   echo "Lint ✅"
@@ -10,4 +10,3 @@ if npm run lint:check; then
 fi
 
 npm run lint
-npm run repo:sign
