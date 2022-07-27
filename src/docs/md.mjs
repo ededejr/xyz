@@ -6,12 +6,58 @@ import rehypeDocument from 'rehype-document';
 import rehypeFormat from 'rehype-format';
 import rehypeStringify from 'rehype-stringify';
 import { reporter } from 'vfile-reporter';
+import rehypeSanitize from 'rehype-sanitize';
+
+function githubMarkdownStyles() {
+  return (tree) => {
+    const html = tree.children.find((child) => child.tagName === 'html');
+    const head = html.children.find((child) => child.tagName === 'head');
+
+    head.children.push({
+      type: 'element',
+      tagName: 'style',
+      children: [
+        {
+          type: 'text',
+          value: `
+            body {
+              box-sizing: border-box;
+              min-width: 200px;
+              max-width: 980px;
+              margin: 0 auto;
+              padding: 45px;
+            }
+      
+            @media (prefers-color-scheme: dark) {
+              body {
+                background-color: #0d1117;
+              }
+            }
+          `,
+        },
+      ],
+    });
+
+    const body = html.children.find((child) => child.tagName === 'body');
+
+    body.children = [
+      {
+        type: 'element',
+        tagName: 'article',
+        properties: { className: 'markdown-body' },
+        children: body.children,
+      },
+    ];
+  };
+}
 
 async function markdownToHtml(text, options = {}) {
   return await unified()
     .use(remarkParse)
     .use(remarkRehype)
+    .use(rehypeSanitize)
     .use(rehypeDocument, options.document)
+    .use(githubMarkdownStyles)
     .use(rehypeFormat)
     .use(rehypeStringify)
     .process(text);
@@ -33,7 +79,12 @@ async function markdownFileToHtml(filePath) {
   const extension = path.extname(filePath);
   const name = path.basename(filePath).replace(extension, '');
   const text = await readFileToText(filePath);
-  return await markdownToHtml(text, { document: { title: name } });
+  return await markdownToHtml(text, {
+    document: {
+      title: name,
+      css: ['https://sindresorhus.com/github-markdown-css/github-markdown.css'],
+    },
+  });
 }
 
 async function htmlToFile(html, name, outputPath, prefix = '') {
