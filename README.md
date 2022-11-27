@@ -1,8 +1,8 @@
 ## xyz
 
-a collection of scripts stitched together using [google/zx](https://github.com/google/zx)
+an experiment stitching together a collection of scripts using [google/zx](https://github.com/google/zx)
 
 ### usage
 
-- must be installed to path probably using [de.sh](https://github.com/ededejr/de.sh)
-- from command line `xyz`
+- add the command to your terminal (source file/via PATH/etc)
+- from command line `xyz [command]`
