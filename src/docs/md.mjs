@@ -8,6 +8,35 @@ import rehypeStringify from 'rehype-stringify';
 import { reporter } from 'vfile-reporter';
 import rehypeSanitize from 'rehype-sanitize';
 
+const { _: args, ...flags } = argv;
+
+const outPath = flags['outpath'] || '';
+const source = flags['source'];
+const pattern = flags['pattern'];
+
+if (source) {
+  const { fullPath, name } = resolveRelativePath(source);
+  const html = await markdownFileToHtml(fullPath);
+  await htmlToFile(html, name, path.join(process.cwd(), outPath));
+}
+
+if (pattern) {
+  const files = await glob(pattern);
+  const promises = files.map((file) => async () => {
+    const baseName = path.basename(file);
+    const name = baseName.replace(path.extname(file), '');
+    const html = await markdownFileToHtml(file);
+    await htmlToFile(
+      html,
+      name,
+      path.join(process.cwd(), outPath),
+      `${chalk.dim(`[${baseName}]:`)} `
+    );
+  });
+
+  await Promise.all(promises.map((p) => p()));
+}
+
 function githubMarkdownStyles() {
   return (tree) => {
     const html = tree.children.find((child) => child.tagName === 'html');
@@ -99,32 +128,4 @@ async function htmlToFile(html, name, outputPath, prefix = '') {
     recursive: true,
   });
   console.log(`${prefix}${chalk.green('✔')} ${outFilePath}`);
-}
-
-const { _: args, ...flags } = argv;
-
-const source = flags['source'];
-const pattern = flags['pattern'];
-
-if (source) {
-  const { fullPath, name } = resolveRelativePath(source);
-  const html = await markdownFileToHtml(fullPath);
-  await htmlToFile(html, name, process.cwd());
-}
-
-if (pattern) {
-  const files = await glob(pattern);
-  const promises = files.map((file) => async () => {
-    const baseName = path.basename(file);
-    const name = baseName.replace(path.extname(file), '');
-    const html = await markdownFileToHtml(file);
-    await htmlToFile(
-      html,
-      name,
-      process.cwd(),
-      `${chalk.dim(`[${baseName}]:`)} `
-    );
-  });
-
-  await Promise.all(promises.map((p) => p()));
 }
