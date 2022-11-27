@@ -20,7 +20,7 @@ const SpotifyEndpoints = {
 export class SpotifyApi {
   accessToken = null;
   accessTokenTimeout = 60 * 1000 * 60;
-  callbackUri = 'https://edede.ca/spotify/callback';
+  callbackUri = 'https://spotify.edede.ca/callback'; // ✨ doesn't exist ✨
 
   /**
    * Get currently playing track from Spotify.
